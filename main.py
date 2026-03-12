@@ -3,7 +3,8 @@ from idlelib.debugger_r import restart_subprocess_debugger
 from typing import is_protocol
 
 from models import InventoryManager,BaseProduct,PerishableProduct,InsufficientStockError
-from utils import *
+from utils import (validate_product_id,quick_sort_inventory,
+                   show_inventory_table,plot_inventory_chart,search_product,export_to_csv)
 
 def main():
     manager = InventoryManager()  # 实例化写好的管理器（自动读取JSON文件）
@@ -28,19 +29,20 @@ def main():
         elif choice == "2":
             handle_search(manager)
         elif choice == "3":
-
+            handle_search(manager)
         elif choice == "4":
-
+            handle_view(manager)
         elif choice == "5":
-
+            handle_warnings(manager)
         elif choice == "6":
-
+            products = list(manager.inventory.values())
+            plot_inventory_chart(products)
         elif choice == "7":
-
+            handle_delete(manager)
         elif choice == "8":
-
+            handle_export(manager)
         elif choice == "9":
-
+            handle_logs(manager)
         elif choice == "0":
             print("💾 正在保存数据...")
             manager.save_data()
@@ -90,3 +92,51 @@ def handle_search(manager):
     results = search_product(products,keyword)
     if results:
         print(f"\n🔍 找到 {len(results)} 条匹配记录：")
+        show_inventory_table(results)
+    else:
+        print("🈳 未找到匹配的商品。")
+
+def handle_view(manager):
+    products = list(manager.inventory.values())
+    if not products:
+        print("🈳 当前仓库为空。")
+        return
+    sorted_products = quick_sort_inventory(products,key="quantity")
+    show_inventory_table(sorted_products)
+
+def handle_warnings(manager):
+    warnings = manager.get_system_warnings()
+    if not warnings:
+        print("✅ 当前系统状态良好，暂无预警。")
+    else:
+        print("\n=== 📢 系统预警 ===")
+        for w in warnings:
+            print(w)
+        print("=================")
+
+def handle_delete(manager):
+    pid = input("请输入要下架的商品ID：").strip().upper()
+    try:
+        manager.delete_product(pid)
+        print(f"✅ 商品 {pid} 已成功下架并删除。")
+    except (KeyError,ValueError) as e:
+        print(f"❌ 删除失败: {e}")
+
+def handle_export(manager):
+    products = list(manager.inventory.values())
+    if export_to_csv(products):
+        print("✅ 库存数据已成功导出到 data/inventory_export.csv")
+    else:
+        print("🈳 仓库为空，无需导出。")
+
+
+def handle_logs(manager):
+    if not manager.logs:
+        print("🈳 暂无日志记录。")
+        return
+    print("\n--- 近期操作日志 ---")
+    for log in manager.logs[-10:]:
+        print(f"[{log["time"]}] {log["action"]} - 商品:{log["pid"]} - 数量:{log['quantity']} - 状态:{log['status']}")
+
+if __name__ == '__main__':
+    main()

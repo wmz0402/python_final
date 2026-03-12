@@ -33,7 +33,7 @@ class BaseProduct:
                 "type": self.get_type()}
 
 # 易腐产品
-class PerishableProduct:
+class PerishableProduct(BaseProduct):
     def __init__(self,pid,name,price,quantity,expiration_days):
         super().__init__(pid,name,price,quantity)      #调用父类的构造方法
         self.expiration_days = expiration_days
@@ -79,7 +79,7 @@ class InventoryManager:
         # 文件的写入
         def save_data(self):
             with open(INVENTORY_FILE, "w",encoding="UTF-8") as f:
-                data = [obj.to_dict() for obj in self.inventory]  # 把对象转化成列表
+                data = [obj.to_dict() for obj in self.inventory]  # 把对象转化成字典列表
                 json.dump(data, f, ensure_ascii=False, indent=4)  # 写入JSON文件，防止中文乱码
 
             with open(LOG_FILE, "w",encoding="UTF-8") as f:
