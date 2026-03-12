@@ -3,15 +3,15 @@ import time    # 记录日志
 import os      # 设置文件历经
 
 #定义文件夹名
-DATE_DIR = "date"
+DATA_DIR = "data"
 # 定义库存数据文件路径
-INVENTORY_FILE = "date/inventory.json"
+INVENTORY_FILE = "data/inventory.json"
 # 定义日志数据文件路径
-LOG_FILE = "date/log.json"
+LOG_FILE = "data/log.json"
 
 # 如果文件不存在自动创建
-if not os.path.exists(DATE_DIR):
-    os.mkdir(DATE_DIR)
+if not os.path.exists(DATA_DIR):
+    os.mkdir(DATA_DIR)
 
 # 定义异常类
 class InsufficientStockError:
@@ -22,7 +22,7 @@ class BaseProduct:
     def __init__(self,pid,name,price,quantity):
         self.pid = pid
         self.name = name
-        self.prize = float(price)
+        self.price = float(price)
         self.quantity =int(quantity)
 
     def get_type(self):
@@ -79,7 +79,7 @@ class InventoryManager:
         # 文件的写入
         def save_data(self):
             with open(INVENTORY_FILE, "w",encoding="UTF-8") as f:
-                data = [obj.to_dict() for obj in self.inventory]  # 把对象转化成字典列表
+                data =[obj.to_dict() for obj in self.inventory.values()]  # 把对象转化成字典列表
                 json.dump(data, f, ensure_ascii=False, indent=4)  # 写入JSON文件，防止中文乱码
 
             with open(LOG_FILE, "w",encoding="UTF-8") as f:

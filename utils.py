@@ -1,7 +1,6 @@
 import re
 import csv
 import matplotlib.pyplot as plt   #画图
-# from PIL.SpiderImagePlugin import iforms
 from prettytable import PrettyTable   # 美化表格
 import matplotlib as mpl    # 防止中文乱码
 
@@ -69,7 +68,7 @@ def export_to_csv(products,filename="data/inventory_export.csv"):
 
     with open(filename,mode="w",encoding="utf-8-sig",newline="") as f:     # -sig使excel能够识别中文防止乱码 new是紧凑不留白
         writer = csv.writer(f)
-        writer.writerows(["商品ID","商品名称","单价","库存数量","产品类型"])
+        writer.writerow(["商品ID","商品名称","单价","库存数量","产品类型"])
         for p in products:
             writer.writerow([p.pid,p.name,p.price,p.quantity,p.get_type()])
     return True

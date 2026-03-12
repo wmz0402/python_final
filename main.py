@@ -1,7 +1,4 @@
 import sys #导入这个模块用来关闭系统
-from idlelib.debugger_r import restart_subprocess_debugger
-from typing import is_protocol
-
 from models import InventoryManager,BaseProduct,PerishableProduct,InsufficientStockError
 from utils import (validate_product_id,quick_sort_inventory,
                    show_inventory_table,plot_inventory_chart,search_product,export_to_csv)
