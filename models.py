@@ -1,6 +1,7 @@
 import json    # 序列化
 import time    # 记录日志
 import os      # 设置文件历经
+from utils import hash_password
 
 #定义文件夹名
 DATA_DIR = "data"
@@ -8,14 +9,54 @@ DATA_DIR = "data"
 INVENTORY_FILE = "data/inventory.json"
 # 定义日志数据文件路径
 LOG_FILE = "data/log.json"
+# 储存用户信息
+USERS_FILE = "data/users.json"
 
 # 如果文件不存在自动创建
 if not os.path.exists(DATA_DIR):
-    os.mkdir(DATA_DIR)
+    os.makedirs(DATA_DIR)
 
 # 定义异常类
 class InsufficientStockError:
     pass
+
+# 用户与权限管理
+class UserManager:
+    def __init__(self):
+        self.users = {}
+        self.load_users()
+
+        # 初始化时如果系统没有用户，自动创建一个默认超级管理员
+        if not self.users:
+            self.register("admin","admin123","admin")
+
+    def load_users(self):
+        try:
+            with open(USERS_FILE,"r",encoding="UTF-8") as f:
+                self.users = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.users = {}
+
+    def save_users(self):
+        with open(USERS_FILE,"w",encoding="UTF-8") as f:
+            json.dump(self.users,f,ensure_ascii=False,indent=4)
+
+    def register(self,username,password,role="employee"):
+        if username in self.users:
+            return False,"用户名已存在！"
+        self.users[username] = {
+            "password":hash_password(password),
+            "role":role,
+        }
+        self.save_users()
+        return True,"注册成功！"
+
+    def login(self,username,password):
+        if username not in self.users:
+            return False,None,"用户不存在！"
+        if self.users[username]["password"] != hash_password(password):
+            return False,None,"密码错误！"
+        return True,self.users[username]["role"],"登陆成功！"
 
 # 商品类
 class BaseProduct:
@@ -48,9 +89,10 @@ class PerishableProduct(BaseProduct):
 
 # 库存管理器
 class InventoryManager:
-        def __init__(self):
+        def __init__(self,current_user = "System"):
             self.inventory = {}
             self.logs = []
+            self.current_user = current_user # 记录当前登录用户
             self.load_data()  #初始化时直接自动读取硬盘数据
            # 文件读取与异常处理
         def load_data(self):
@@ -88,6 +130,7 @@ class InventoryManager:
         def log_transaction(self,action,pid,qty,status):
             record = {
                 "time":time.strftime("%Y-%m-%d %H:%M:%S"),
+                "operation":self.current_user,
                 "action":action,
                 "pid":pid,
                 "quantity":qty,
@@ -109,7 +152,8 @@ class InventoryManager:
 
             if self.inventory[pid].quantity < qty:
                 self.log_transaction("出库",pid,qty,"失败")
-                raise InsufficientStockError(f"库存不足！当前{self.inventory[pid].name}仅剩{self.inventory[pid].quantity}件")
+                raise InsufficientStockError(f"库存不足！当前{self.inventory[pid].name}"
+                                             f"仅剩{self.inventory[pid].quantity}件")
 
             self.inventory[pid].quantity -= qty
             self.log_transaction("出库",pid,qty,"成功")
@@ -123,7 +167,7 @@ class InventoryManager:
                 raise ValueError(f"无法下架！商品{self.inventory[pid].name}仍有库存{self.inventory[pid].quantity}件，请先完成出库")
 
             del self.inventory[pid]
-            self.log_transaction("下架",pid,0,"完成")
+            self.log_transaction("下架删除",pid,0,"成功")
             self.save_data()
 
         # 库存不足，临期预警

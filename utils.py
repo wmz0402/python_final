@@ -1,5 +1,6 @@
 import re
 import csv
+import hashlib
 import matplotlib.pyplot as plt   #画图
 from prettytable import PrettyTable   # 美化表格
 import matplotlib as mpl    # 防止中文乱码
@@ -7,6 +8,15 @@ import matplotlib as mpl    # 防止中文乱码
 # 设置中文汉字，防止图标乱码
 mpl.rcParams['font.sans-serif'] = ['SimHei']     #默认字体为黑体
 mpl.rcParams['axes.unicode_minus'] = False    # 解决保存图像是负号显示为方块的问题
+
+def hash_password(password):
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+# 进行加密操作
+def validate_password(password):
+    # 至少六位，包含字母和数字
+    pattern = r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$"
+    return bool(re.match(pattern,password))
 
 # 验证产品的编码是否符合要求·
 def validate_product_id(pid):
