@@ -26,7 +26,6 @@ class UserManager:
         self.users = {}
         self.load_users()
 
-        # 初始化时如果系统没有用户，自动创建一个默认超级管理员
         if not self.users:
             self.register("admin","admin123","admin")
 

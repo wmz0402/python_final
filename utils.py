@@ -12,7 +12,7 @@ mpl.rcParams['axes.unicode_minus'] = False    # 解决保存图像是负号显�
 def hash_password(password):
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
-# 进行加密操作
+# 进判断是否符合要求
 def validate_password(password):
     # 至少六位，包含字母和数字
     pattern = r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$"
