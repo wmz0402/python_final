@@ -65,16 +65,18 @@ class UserManager:
         return None
 
 # 验证保密答案，并重置密码
-    def verify_answer_and_reset(self,username,answer,new_password):
+    def verify_security_answer(self,username,answer):
         if username not in self.users:
-            return False,"用户不存在！"
+            return False
         stored_answer = self.users[username].get("answer","")
-        if stored_answer != answer:
-            return False,"保密答案错误！"
+        return stored_answer == answer
 
-        self.users[username]["password"] = hash_password(new_password)
-        self.save_users()
-        return True
+    def reset_password(self,username,new_password):
+        if username in self.users:
+            self.users[username]["password"] = hash_password(new_password)
+            self.save_users()
+            return True,"密码重置成功，请使用新密码重新登陆！"
+        return False,"用户不存在！"
 # 商品类
 class BaseProduct:
     def __init__(self,pid,name,price,quantity):

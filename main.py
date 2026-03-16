@@ -24,7 +24,7 @@ def auth_menu(auth_mgr):
         print("0. 🚪 退出程序")
         print("*"*35)
 
-        choice = input("请选择操作（0-3）：").strip()
+        choice = input("请选择操作（0-4）：").strip()
 
         if choice == "1":
             username = input("👤 请输入用户名: ").strip()
@@ -44,7 +44,7 @@ def auth_menu(auth_mgr):
                     continue
 
             username = input("请设置用户名：").strip()
-            password = pwinput.pwinput("请设置密码（至少六位数必须包含数字和字母）: ", mask='*').strip().strip()
+            password = pwinput.pwinput("请设置密码（至少六位数必须包含数字和字母）: ", mask='*').strip()
 
             if not validate_password(password):
                 print("❌ 密码格式不符要求！必须包含字母和数字，且至少6位。")
@@ -69,11 +69,16 @@ def auth_menu(auth_mgr):
             print(f"❓ 密保问题: {question}")
             answer = input("💡 请输入密保答案: ").strip()
 
+            if not auth_mgr.verify_security_answer(username,answer):
+                print("❌ 密保答案错误！无法重置密码。")
+                continue
+
+            print("✅ 身份验证通过！")
             new_password = pwinput.pwinput("🔑 请设置新密码（至少六位数包含数字和字母）: ", mask='*').strip()
             if not validate_password(new_password):
                 print("❌ 密码格式不符要求！必须包含字母和数字，且至少6位。")
                 continue
-            success,msg = auth_mgr.register(username,new_password)
+            success,msg = auth_mgr.reset_password(username,new_password)
             if success:
                 print(f"✅ {msg}")
             else:
