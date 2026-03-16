@@ -27,7 +27,7 @@ class UserManager:
         self.load_users()
 
         if not self.users:
-            self.register("admin","admin0402","admin")
+            self.register("admin","admin0402","admin","我的生日是？","070402")
 
     def load_users(self):
         try:
@@ -40,12 +40,14 @@ class UserManager:
         with open(USERS_FILE,"w",encoding="UTF-8") as f:
             json.dump(self.users,f,ensure_ascii=False,indent=4)
 
-    def register(self,username,password,role="employee"):
+    def register(self,username,password,role="employee",question="",answer=""):
         if username in self.users:
             return False,"用户名已存在！"
         self.users[username] = {
             "password":hash_password(password),
             "role":role,
+            "question":question,
+            "answer":answer
         }
         self.save_users()
         return True,"注册成功！"
@@ -56,7 +58,23 @@ class UserManager:
         if self.users[username]["password"] != hash_password(password):
             return False,None,"密码错误！"
         return True,self.users[username]["role"],"登陆成功！"
+# 获取用户对应的保密问题
+    def get_user_question(self,username):
+        if username in self.users:
+            return self.users[username].get("question","")
+        return None
 
+# 验证保密答案，并重置密码
+    def verify_answer_and_reset(self,username,answer,new_password):
+        if username not in self.users:
+            return False,"用户不存在！"
+        stored_answer = self.users[username].get("answer","")
+        if stored_answer != answer:
+            return False,"保密答案错误！"
+
+        self.users[username]["password"] = hash_password(new_password)
+        self.save_users()
+        return True
 # 商品类
 class BaseProduct:
     def __init__(self,pid,name,price,quantity):

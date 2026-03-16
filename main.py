@@ -1,6 +1,6 @@
 import sys #导入这个模块用来关闭系统
 import os
-import time
+import pwinput
 from models import InventoryManager,BaseProduct,PerishableProduct,InsufficientStockError,UserManager
 from utils import (validate_product_id,validate_password,quick_sort_inventory,
                    show_inventory_table,plot_inventory_chart,search_product,export_to_csv)
@@ -20,6 +20,7 @@ def auth_menu(auth_mgr):
         print("1. 🔑 账号登录")
         print("2. 📝 注册普通员工账号")
         print("3. 👑 注册系统管理员账号 (需内部邀请码)")
+        print("4. ❓ 找回密码")
         print("0. 🚪 退出程序")
         print("*"*35)
 
@@ -27,7 +28,7 @@ def auth_menu(auth_mgr):
 
         if choice == "1":
             username = input("👤 请输入用户名: ").strip()
-            password = input("🔑 请输入密  码: ").strip()
+            password = pwinput.pwinput("🔑 请输入密  码: ", mask='*').strip()
             success,role,msg = auth_mgr.login(username,password)
             if success:
                 print(f"\n🎉 {msg} 欢迎回来，{username}！")
@@ -43,14 +44,38 @@ def auth_menu(auth_mgr):
                     continue
 
             username = input("请设置用户名：").strip()
-            password = input("请设置密码（至少六位数必须包含数字和字母）").strip()
+            password = pwinput.pwinput("请设置密码（至少六位数必须包含数字和字母）: ", mask='*').strip().strip()
 
             if not validate_password(password):
                 print("❌ 密码格式不符要求！必须包含字母和数字，且至少6位。")
                 continue
-            success,msg = auth_mgr.register(username,password)
+            question = input("请设置保密问题（用于密码找回）：").strip()
+            answer = input("请设置保密答案：").strip()
+            if not question or not answer:
+                print("❌ 密保问题和答案不能为空！")
+                continue
+            success,msg = auth_mgr.register(username,password,role,question,answer)
             if success:
                 print(f"✅ {msg} 请返回登录。")
+            else:
+                print(f"❌ {msg}")
+        elif choice == "4":
+            username = input("👤 请输入需要找回密码的用户名: ").strip()
+            question = auth_mgr.get_user_question(username)
+
+            if not question:
+                print("❌ 该用户不存在，或早期老账号未设置密保问题，无法找回！")
+                continue
+            print(f"❓ 密保问题: {question}")
+            answer = input("💡 请输入密保答案: ").strip()
+
+            new_password = pwinput.pwinput("🔑 请设置新密码（至少六位数包含数字和字母）: ", mask='*').strip()
+            if not validate_password(new_password):
+                print("❌ 密码格式不符要求！必须包含字母和数字，且至少6位。")
+                continue
+            success,msg = auth_mgr.register(username,new_password)
+            if success:
+                print(f"✅ {msg}")
             else:
                 print(f"❌ {msg}")
 
