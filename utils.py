@@ -32,7 +32,7 @@ def search_product(products,keyword):
             result.append(p)
     return result
 #按指定键（数量或价格）对库存进行升序排列
-def quick_sort_inventory(items,key="quantity"):
+def quick_sort_inventory(items,key="quantity",reverse=False):
     if len(items) <= 1:
         return items
     pivot = items[len(items)//2]
@@ -44,7 +44,10 @@ def quick_sort_inventory(items,key="quantity"):
     middle = [x for x in items if get_val(x) == get_val(pivot)]
     right = [x for x in items if get_val(x) > get_val(pivot)]
 
-    return quick_sort_inventory(left,key) + middle + quick_sort_inventory(right,key)
+    if reverse:
+        return quick_sort_inventory(right,key,True) + middle + quick_sort_inventory(left,key,True)
+    else:
+        return quick_sort_inventory(left,key,False) + middle + quick_sort_inventory(right,key,False)
 
 def show_inventory_table(products):
     # 打印表格

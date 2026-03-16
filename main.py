@@ -1,10 +1,20 @@
 import sys #导入这个模块用来关闭系统
+import os
+import time
 from models import InventoryManager,BaseProduct,PerishableProduct,InsufficientStockError,UserManager
 from utils import (validate_product_id,validate_password,quick_sort_inventory,
                    show_inventory_table,plot_inventory_chart,search_product,export_to_csv)
+# 清屏函数
+def clear_screen(wait=True):
+    if wait:
+        input("\n👉 按 Enter 键继续...")
+    os.system('cls' if os.name == 'nt' else 'clear')
 # 身份确认菜单
 def auth_menu(auth_mgr):
+    wait = False
     while True:
+        clear_screen(wait)
+        wait = True
         print("\n"+"*"*35)
         print("🔐 欢迎使用Luck007的仓库管理系统")
         print("1. 🔑 账号登录")
@@ -69,7 +79,7 @@ def handle_inbound(manager):
         print(f"✅ {pid} 成功补货 {qty} 件！")
     else:
         print("🆕 这是一个新商品，请输入详细信息。")
-        name = input("商品名称").strip()
+        name = input("商品名称：").strip()
         try:
             price = float(input("商品单价：").strip())
             is_perishable = input("是否为易腐商品？（y/n）:").strip().lower()
@@ -114,7 +124,22 @@ def handle_view(manager):
     if not products:
         print("🈳 当前仓库为空。")
         return
-    sorted_products = quick_sort_inventory(products,key="quantity")
+
+    print("\n请选择排序依据：")
+    print("1. 📦 按库存数量 (默认)")
+    print("2. 💰 按商品单价")
+    key_choice = input("请输入选项（1-2）:").strip()
+    sort_key = "price" if key_choice == "2" else "quantity"
+
+    print("\n请选择排序方式：")
+    print("1. ⬆️ 升序 / 从小到大 (默认)")
+    print("2. ⬇️ 降序 / 从大到小")
+    order_choice = input("请输入选项（1-2）：").strip()
+    reverse_order = True if order_choice == "2" else False
+
+    sorted_products = quick_sort_inventory(products,key=sort_key,reverse=reverse_order)
+    print(f"\n📊 当前库存（按 {'单价' if sort_key=='price' else '库存数量'}"
+          f"{'降序' if reverse_order else '升序'}排列）：")
     show_inventory_table(sorted_products)
 
 def handle_warnings(manager):
@@ -157,14 +182,17 @@ def main():
     current_user,role = auth_menu(auth_mgr)
     role_name="管理员" if role == "admin" else "普通员工"
     manager = InventoryManager(current_user=current_user)  # 实例化写好的管理器（自动读取JSON文件）
+    wait = False
     while True:
+        clear_screen(wait)
+        wait = True
         print("\n"+"="*35)
         print(f"  仓库管理系统主菜单 | 登录用户：{current_user} [{role_name}]  ")
         print("="*35)
         print("1. ➕ 商品入库 (新增/补货)")
         print("2. ➖ 商品出库")
         print("3. 🔍 检索商品 (名称/ID)")
-        print("4. 📋 查看库存总览 (按库存排序)")
+        print("4. 📋 查看库存总览 ")
         print("5. ⚠️ 系统智能预警 (缺货/临期)")
         print("6. 📊 生成库存可视化图表")
         if role == "admin":

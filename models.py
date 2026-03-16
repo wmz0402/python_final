@@ -17,7 +17,7 @@ if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
 # 定义异常类
-class InsufficientStockError:
+class InsufficientStockError(Exception):
     pass
 
 # 用户与权限管理
@@ -27,7 +27,7 @@ class UserManager:
         self.load_users()
 
         if not self.users:
-            self.register("admin","admin123","admin")
+            self.register("admin","admin0402","admin")
 
     def load_users(self):
         try:
@@ -129,7 +129,7 @@ class InventoryManager:
         def log_transaction(self,action,pid,qty,status):
             record = {
                 "time":time.strftime("%Y-%m-%d %H:%M:%S"),
-                "operation":self.current_user,
+                "operator":self.current_user,
                 "action":action,
                 "pid":pid,
                 "quantity":qty,
