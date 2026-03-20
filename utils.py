@@ -14,7 +14,7 @@ def hash_password(password):
 
 # 进判断是否符合要求
 def validate_password(password):
-    # 至少六位，包含字母和数字
+
     pattern = r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$"
     return bool(re.match(pattern,password))
 
@@ -64,14 +64,14 @@ def plot_inventory_chart(products):
     names = [p.name for p in products]
     quantities = [p.quantity for p in products]
 
-    plt.figure(figsize=(10,6))      # 用来设置图的大小
+    plt.figure(figsize=(10,6))
     plt.bar(names,quantities,color="skyblue")    # 确认x，y轴的内容并给柱体选择颜色
-    plt.title("当前仓库商品库存分布图")   # 标题
-    plt.xlabel("商品名称")             # x轴文字说明
-    plt.ylabel("库存数量")             # y轴文字说明
-    plt.xticks(rotation=45)           # 使字体倾斜45°
+    plt.title("当前仓库商品库存分布图")
+    plt.xlabel("商品名称")
+    plt.ylabel("库存数量")
+    plt.xticks(rotation=45)
     plt.tight_layout()                # 自动调整布局防止文字被裁掉
-    plt.show()                        # 展示最终效果
+    plt.show()
 
 
 # 将库存数据转化为csv的形式

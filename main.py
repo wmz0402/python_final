@@ -129,7 +129,7 @@ def handle_inbound(manager):
 def handle_outbound(manager):
     pid = input("请输入商品ID：").strip().upper()
     try:
-        qty = int(input("请输入出库数量").strip())
+        qty = int(input("请输入出库数量:").strip())
         manager.outbound(pid,qty)
         print(f"✅ 成功出库 {qty} 件！")
     except ValueError:

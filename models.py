@@ -39,7 +39,7 @@ class UserManager:
     def save_users(self):
         with open(USERS_FILE,"w",encoding="UTF-8") as f:
             json.dump(self.users,f,ensure_ascii=False,indent=4)
-
+    # 注册
     def register(self,username,password,role="employee",question="",answer=""):
         if username in self.users:
             return False,"用户名已存在！"
@@ -117,7 +117,7 @@ class InventoryManager:
         def load_data(self):
             try:
                 with open(INVENTORY_FILE, "r",encoding="UTF-8") as f:
-                    data = json.load(f)   # 把JSON文本转成Python列
+                    data = json.load(f)   # 把JSON文本转成Python
                     for item in data:
                         if "expiration_days" in item:
                             # 实例化为易腐商品子类
